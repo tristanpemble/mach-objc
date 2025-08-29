@@ -2,7 +2,7 @@ const builtin = @import("builtin");
 const std = @import("std");
 
 pub extern "System" fn dispatch_async(queue: *anyopaque, work: *const Block(fn (*BlockLiteral(void)) void)) void;
-pub extern "System" fn dispatch_async_f(queue: *anyopaque, context: ?*anyopaque, work: *const fn (context: ?*anyopaque) callconv(.C) void) void;
+pub extern "System" fn dispatch_async_f(queue: *anyopaque, context: ?*anyopaque, work: *const fn (context: ?*anyopaque) callconv(.c) void) void;
 pub extern "System" fn @"dispatch_assert_queue$V2"(queue: *anyopaque) void;
 pub extern "System" var _dispatch_main_q: anyopaque;
 
@@ -100,8 +100,8 @@ fn CopyDisposeBlockDescriptor(comptime Context: type) type {
         copy: *const CopyFn,
         dispose: *const DisposeFn,
 
-        pub const CopyFn = fn (dst: *BlockLiteral(Context), src: *const BlockLiteral(Context)) callconv(.C) void;
-        pub const DisposeFn = fn (block: *const BlockLiteral(Context)) callconv(.C) void;
+        pub const CopyFn = fn (dst: *BlockLiteral(Context), src: *const BlockLiteral(Context)) callconv(.c) void;
+        pub const DisposeFn = fn (block: *const BlockLiteral(Context)) callconv(.c) void;
 
         fn static(comptime size: c_ulong, comptime copy: CopyFn, comptime dispose: DisposeFn) *const CopyDisposeBlockDescriptor {
             const Static = struct {
@@ -143,8 +143,8 @@ fn validateBlockSignature(comptime Invoke: type, comptime ExpectedLiteralType: t
 pub fn stackBlockLiteral(
     invoke: anytype,
     context: anytype,
-    comptime copy: ?fn (dst: *BlockLiteral(@TypeOf(context)), src: *const BlockLiteral(@TypeOf(context))) callconv(.C) void,
-    comptime dispose: ?fn (block: *const BlockLiteral(@TypeOf(context))) callconv(.C) void,
+    comptime copy: ?fn (dst: *BlockLiteral(@TypeOf(context)), src: *const BlockLiteral(@TypeOf(context))) callconv(.c) void,
+    comptime dispose: ?fn (block: *const BlockLiteral(@TypeOf(context))) callconv(.c) void,
 ) BlockLiteralWithSignature(@TypeOf(context), SignatureWithoutBlockLiteral(@TypeOf(invoke))) {
     const Context = @TypeOf(context);
     const Literal = BlockLiteral(Context);

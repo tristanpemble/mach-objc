@@ -48,20 +48,22 @@ pub const Enum = struct {
     const Self = @This();
     const ValueList = std.ArrayList(EnumValue);
 
+    allocator: std.mem.Allocator,
     name: []const u8,
     ty: Type,
     values: ValueList,
 
     pub fn init(allocator: std.mem.Allocator, name: []const u8) Enum {
         return Enum{
+            .allocator = allocator,
             .name = name,
             .ty = undefined,
-            .values = ValueList.init(allocator),
+            .values = .empty,
         };
     }
 
     pub fn deinit(self: *Self) void {
-        self.values.deinit();
+        self.values.deinit(self.allocator);
     }
 };
 
@@ -109,8 +111,8 @@ pub const Method = struct {
         };
     }
 
-    pub fn deinit(self: *Self) void {
-        self.params.deinit();
+    pub fn deinit(self: *Self, allocator: std.mem.Allocator) void {
+        self.params.deinit(allocator);
     }
 };
 
@@ -121,6 +123,7 @@ pub const Container = struct {
     const PropertyList = std.ArrayList(Property);
     const MethodList = std.ArrayList(Method);
 
+    allocator: std.mem.Allocator,
     name: []const u8,
     super: ?*Container,
     protocols: ContainerList,
@@ -132,25 +135,26 @@ pub const Container = struct {
 
     pub fn init(allocator: std.mem.Allocator, name: []const u8, is_interface: bool) Container {
         return Container{
+            .allocator = allocator,
             .name = name,
             .super = null,
-            .protocols = ContainerList.init(allocator),
-            .type_params = TypeParamList.init(allocator),
-            .properties = PropertyList.init(allocator),
-            .methods = MethodList.init(allocator),
+            .protocols = .empty,
+            .type_params = .empty,
+            .properties = .empty,
+            .methods = .empty,
             .is_interface = is_interface,
             .ambiguous = false,
         };
     }
 
     pub fn deinit(self: *Self) void {
-        self.protocols.deinit();
-        self.type_params.deinit();
-        self.properties.deinit();
+        self.protocols.deinit(self.allocator);
+        self.type_params.deinit(self.allocator);
+        self.properties.deinit(self.allocator);
         for (self.methods.items) |*method| {
-            method.deinit();
+            method.deinit(self.allocator);
         }
-        self.methods.deinit();
+        self.methods.deinit(self.allocator);
     }
 };
 

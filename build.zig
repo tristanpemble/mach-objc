@@ -4,7 +4,7 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
     const target = b.standardTargetOptions(.{});
 
-    const module = b.addModule("mach-objc", .{
+    const module = b.addModule("mach_objc", .{
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
@@ -36,9 +36,11 @@ pub fn build(b: *std.Build) void {
 
     const generator_exe = b.addExecutable(.{
         .name = "generator",
-        .root_source_file = b.path("generator.zig"),
-        .target = target,
-        .optimize = optimize,
+        .root_module = b.addModule("mach-objc", .{
+            .root_source_file = b.path("generator.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
     });
     b.installArtifact(generator_exe);
 }
